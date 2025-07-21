@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'chennuriakhilvarma/go-app' // Replace if your Docker Hub username or repo differs
+        DOCKER_IMAGE = 'banda2133/go-app' // Replace if your Docker Hub username or repo differs
     }
 
     stages {
