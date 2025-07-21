@@ -1,20 +1,20 @@
 pipeline {
     agent {
         docker {
-            image 'golang:1.24.2'
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // To enable Docker-in-Docker
+            image 'golang:1.24.2' // or any version that has Go
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
     environment {
-        DOCKER_IMAGE = 'banda2133/go-app' // Replace if your Docker Hub username or repo differs
+        DOCKER_IMAGE = 'banda2133/go-app'
     }
 
     stages {
-        stage('Docker Check') {
+        stage('Check Tools') {
             steps {
+                sh 'go version'
                 sh 'docker --version'
-                sh 'docker ps'
             }
         }
 
@@ -37,15 +37,10 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE:latest .'
-            }
-        }
-
-        stage('Docker Push') {
+        stage('Docker Build & Push') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'docker build -t $DOCKER_IMAGE:latest .'
                     sh 'echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin'
                     sh 'docker push $DOCKER_IMAGE:latest'
                 }
