@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image ':golang:1.24.2'
+            image 'golang:1.24.2'
             args '-v /var/run/docker.sock:/var/run/docker.sock' // To enable Docker-in-Docker
         }
     }
