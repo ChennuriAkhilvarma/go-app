@@ -1,50 +1,49 @@
 pipeline {
-    agent {
-        docker {
-            image 'golang:1.24.3'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+  agent any
 
-    environment {
+ environment {
         DOCKER_IMAGE = 'banda2133/go-app'
     }
 
-    stages {
-        stage('Check Tools') {
-            steps {
-                sh 'go version'
-                sh 'docker version' // ✅ Add this line
-            }
-        }
-
-        stage('Checkout') {
-            steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'go mod tidy'
-                sh 'go build -o app'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'go test ./...'
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh 'docker build -t $DOCKER_IMAGE:latest .'
-                    sh 'echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE:latest'
-                }
-            }
-        }
+  stages {
+    stage('Clone') {
+      steps {
+        git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
+      }
     }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t banda2133/go-app:latest .'
+      }
+    }
+
+    stage('Push to Docker Hub') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PWD', usernameVariable: 'DOCKER_USER')]) {
+          sh '''
+            echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
+            docker push banda2133/go-app:latest
+          '''
+        }
+      }
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+
+    
