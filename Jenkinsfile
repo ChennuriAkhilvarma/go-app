@@ -1,21 +1,33 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image ':golang:1.24.2'
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // To enable Docker-in-Docker
+        }
+    }
 
     environment {
-        DOCKER_IMAGE = 'banda2133/go-app'
+        DOCKER_IMAGE = 'chennuriakhilvarma/go-app' // Replace if your Docker Hub username or repo differs
     }
 
     stages {
-       stage('Checkout') {
-    steps {
-        git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
-    }
-}
+        stage('Docker Check') {
+            steps {
+                sh 'docker --version'
+                sh 'docker ps'
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
+            }
+        }
 
         stage('Build') {
             steps {
                 sh 'go mod tidy'
-                sh 'go build -o main .'
+                sh 'go build -o app'
             }
         }
 
