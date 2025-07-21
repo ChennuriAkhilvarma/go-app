@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'golang:1.24.2' // or any version that has Go
+            image 'golang:1.24.3'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -14,7 +14,7 @@ pipeline {
         stage('Check Tools') {
             steps {
                 sh 'go version'
-                sh 'docker --version'
+                sh 'docker version' // ✅ Add this line
             }
         }
 
