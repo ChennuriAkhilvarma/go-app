@@ -78,7 +78,6 @@ Here’s how the Jenkins CI pipeline works:
 git clone https://github.com/ChennuriAkhilvarma/go-app.git
 cd go-app
 🧱 Run Jenkins in Docker
-bash
 
 docker run -d \
   -u root \

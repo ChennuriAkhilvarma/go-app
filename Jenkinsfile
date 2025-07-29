@@ -8,7 +8,6 @@ pipeline {
   stages {
     stage('Clone') {
       steps {
-        // Make sure 'github-creds' is a valid credential ID
         git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
       }
     }
