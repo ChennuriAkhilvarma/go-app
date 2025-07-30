@@ -14,9 +14,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        script {
-          sh "docker build -t ${DOCKER_IMAGE} ."
-        }
+        sh "docker build -t $DOCKER_IMAGE ."
       }
     }
 
@@ -33,6 +31,15 @@ pipeline {
           '''
         }
       }
+    }
+  }
+
+  post {
+    failure {
+      echo 'Build failed.'
+    }
+    success {
+      echo 'Build succeeded and Docker image pushed.'
     }
   }
 }
