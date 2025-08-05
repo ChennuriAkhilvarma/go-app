@@ -1,45 +1,67 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    DOCKER_IMAGE = 'banda2133/go-app:latest'
-  }
-
-  stages {
-    stage('Clone') {
-      steps {
-        git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
-      }
+    environment {
+        IMAGE_NAME = "go-app"
+        HARBOR_URL = "harbor.example.com"      // 🔁 Replace with your Harbor domain
+        PROJECT = "library"                    // 🔁 Replace with your Harbor project name
+        TAG = "${BUILD_NUMBER}"
     }
 
-    stage('Build Docker Image') {
-      steps {
-        sh "docker build -t $DOCKER_IMAGE ."
-      }
-    }
+    stages {
 
-    stage('Push to Docker Hub') {
-      steps {
-        withCredentials([usernamePassword(
-          credentialsId: 'dockerhub-creds',
-          usernameVariable: 'DOCKER_USER',
-          passwordVariable: 'DOCKER_PWD'
-        )]) {
-          sh '''
-            echo "$DOCKER_PWD" | docker login -u "$DOCKER_USER" --password-stdin
-            docker push $DOCKER_IMAGE
-          '''
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    }
-  }
 
-  post {
-    failure {
-      echo 'Build failed.'
+        stage('Lint') {
+            steps {
+                echo "Running golangci-lint..."
+                sh '''
+                    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
+                    $(go env GOPATH)/bin/golangci-lint run
+                '''
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo "Running go test..."
+                sh 'go test ./...'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${HARBOR_URL}/${PROJECT}/${IMAGE_NAME}:${TAG} ."
+                }
+            }
+        }
+
+        stage('Push to Harbor') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'harbor-creds', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
+                    script {
+                        sh """
+                            echo "${HARBOR_PASS}" | docker login ${HARBOR_URL} -u "${HARBOR_USER}" --password-stdin
+                            docker push ${HARBOR_URL}/${PROJECT}/${IMAGE_NAME}:${TAG}
+                            docker logout ${HARBOR_URL}
+                        """
+                    }
+                }
+            }
+        }
     }
-    success {
-      echo 'Build succeeded and Docker image pushed.'
+
+    post {
+        failure {
+            echo '❌ Build failed!'
+        }
+        success {
+            echo '✅ Build and push to Harbor successful!'
+        }
     }
-  }
 }
