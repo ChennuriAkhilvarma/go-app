@@ -14,9 +14,9 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('clone') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git', branch: 'master'
+                git credentialsId: 'github-creds', url: 'https://github.com/ChennuriAkhilvarma/go-app.git'
             }
         }
 
