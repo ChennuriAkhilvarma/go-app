@@ -11,10 +11,9 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/hello", HelloHandler)
-	http.ListenAndServe(":8080", nil)
+
+	// FIX: handle the error returned by ListenAndServe
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		fmt.Println("Server failed:", err)
+	}
 }
-//vbfdf,;fd
-//vdsfgrfdsrfvr
-//sbvdfdfdbfe
-//bfaesgfesb
-//dbfdfesfwaefeds//
