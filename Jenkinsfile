@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        HARBOR_URL = 'http://10.1.0.11:30002/'     // 🔁 Replace with your actual Harbor hostname
+        HARBOR_URL = '10.1.0.11:30002'     // 🔁 Replace with your actual Harbor hostname
         PROJECT = 'ci-cd'
         IMAGE_NAME = 'go-app'
         TAG = "${env.BUILD_NUMBER}"
