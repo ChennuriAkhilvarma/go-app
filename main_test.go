@@ -23,3 +23,28 @@ func TestHelloHandler(t *testing.T) {
 		t.Errorf("Expected body to contain greeting, got %s", body)
 	}
 }
+
+func TestHelloHandler_StatusOK(t *testing.T) {
+	req := httptest.NewRequest("GET", "/hello", nil)
+	rec := httptest.NewRecorder()
+
+	HelloHandler(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, rec.Code)
+	}
+}
+
+func TestHelloHandler_BodyExactMatch(t *testing.T) {
+	req := httptest.NewRequest("GET", "/hello", nil)
+	rec := httptest.NewRecorder()
+
+	HelloHandler(rec, req)
+
+	expected := "Hello, DevOps World!"
+	actual := rec.Body.String()
+
+	if actual != expected {
+		t.Errorf("Expected response body %q, got %q", expected, actual)
+	}
+}
